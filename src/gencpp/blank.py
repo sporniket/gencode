@@ -110,6 +110,22 @@ class GeneratorOfBlankFiles:
         )
 
         parser.add_argument(
+            "--copyright_years",
+            metavar="<years>",
+            type=str,
+            default="20xx",
+            help="A string listing all the years to report in the copyright notice",
+        )
+
+        parser.add_argument(
+            "--copyright_authors",
+            metavar="<authors>",
+            type=str,
+            default="Unknown author",
+            help="A string listing all the authors to report in the copyright notice",
+        )
+
+        parser.add_argument(
             "params",
             metavar="<parameter...>",
             type=str,
@@ -154,8 +170,8 @@ class GeneratorOfBlankFiles:
 
     def run(self, args):
         config = {
-            "YEARS_COPYRIGHT": "20xx",
-            "NAMES_COPYRIGHT": "Unknown author",
+            "YEARS_COPYRIGHT": args.copyright_years,
+            "NAMES_COPYRIGHT": args.copyright_authors,
             "LABEL_PROJECT": "Unknown project",
             "DESCRIPTION_PROJECT": "This project is unknown",
         }

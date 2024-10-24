@@ -172,3 +172,44 @@ def test_that_it_generate_a_valid_licence_notice():
         ],
     ]:
         thenActualFileIsSameAsExpected(fileset[0], fileset[1])
+
+
+def test_that_it_generate_a_header_guard_using_a_library_name():
+    # Prepare files
+    setupFileNames = []
+    tmp_dir = initializeTmpWorkspace(
+        [os.path.join(SOURCE_DATA_FILES, f) for f in setupFileNames]
+    )
+
+    # execute
+    with patch.object(
+        sys,
+        "argv",
+        ARGS
+        + [
+            "--root",
+            tmp_dir,
+            "--library",
+            "superUtils",
+            "foo",
+        ],
+    ):
+        with redirect_stdout(io.StringIO()) as out:
+            with redirect_stderr(io.StringIO()) as err:
+                returnCode = GenCppCli().run()
+
+    # verify
+    assert out.getvalue() == ""
+    assert err.getvalue() == ""
+    assert returnCode == 0
+    for fileset in [
+        [
+            os.path.join(tmp_dir, "lib", "superUtils", "include", "foo.hpp"),
+            os.path.join(EXPECTED_DATA_FILES, "lib_foo.hpp"),
+        ],
+        [
+            os.path.join(tmp_dir, "lib", "superUtils", "src", "foo.cpp"),
+            os.path.join(EXPECTED_DATA_FILES, "lib_foo.cpp"),
+        ],
+    ]:
+        thenActualFileIsSameAsExpected(fileset[0], fileset[1])

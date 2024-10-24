@@ -71,6 +71,13 @@ TEMPLATE_SOURCES = {
 }
 
 
+ONLY_DOTS = re.compile(r"[.]{3,}")  # accept '.' and '..' as path fragment
+
+
+def splitAndFilterPath(path: str) -> list[str]:
+    return [f for f in path.split("/") if f and not ONLY_DOTS.match(f)]
+
+
 class GeneratorOfBlankFiles:
     def __init__(self):
         env = jinja2.Environment()
@@ -140,6 +147,14 @@ class GeneratorOfBlankFiles:
             type=str,
             default="",
             help="A SPDX identifier or a SPDX license expressions",
+        )
+
+        parser.add_argument(
+            "--library",
+            metavar="<library>",
+            type=str,
+            default="",
+            help="The library label, e.g. 'superUtils', into which directory the files will be generated",
         )
 
         parser.add_argument(
@@ -225,15 +240,24 @@ class GeneratorOfBlankFiles:
 
         rootPath = "."
         if args.root:
-            only_dots = re.compile(r"[.]+")
-            parts = [f for f in args.root.split("/") if f and not only_dots.match(f)]
+            parts = splitAndFilterPath(args.root)
             rootPath = os.path.join(rootPath, *parts)
+
+        if args.library:
+            rootPath = os.path.join(
+                rootPath, "lib", splitAndFilterPath(args.library)[0]
+            )
 
         self.checkFolderOrMake(os.path.join(rootPath, "include"))
         self.checkFolderOrMake(os.path.join(rootPath, "src"))
 
         for i, n in enumerate(args.params):
-            config["CODE_GUARD"] = Identifier(f"{args.params[i]}.hpp").allcaps
+            guardName = (
+                f"_lib_{args.library}_{args.params[i]}.hpp"
+                if args.library
+                else f"{args.params[i]}.hpp"
+            )
+            config["CODE_GUARD"] = Identifier(guardName).allcaps
             config["NAME_HEADER"] = args.params[i]
             self.generateHeaderFile(rootPath, args, config, i)
             self.generateProgramFile(rootPath, args, config, i)

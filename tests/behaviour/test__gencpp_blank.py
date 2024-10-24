@@ -213,3 +213,44 @@ def test_that_it_generate_a_header_guard_using_a_library_name():
         ],
     ]:
         thenActualFileIsSameAsExpected(fileset[0], fileset[1])
+
+
+def test_that_it_uses_a_config_file_to_factor_common_parameters():
+    # Prepare files
+    setupFileNames = []
+    tmp_dir = initializeTmpWorkspace(
+        [os.path.join(SOURCE_DATA_FILES, f) for f in setupFileNames]
+    )
+
+    # execute
+    with patch.object(
+        sys,
+        "argv",
+        ARGS
+        + [
+            "--root",
+            tmp_dir,
+            "--config",
+            "gencode:tests/data/config.json",
+            "foo",
+        ],
+    ):
+        with redirect_stdout(io.StringIO()) as out:
+            with redirect_stderr(io.StringIO()) as err:
+                returnCode = GenCppCli().run()
+
+    # verify
+    assert out.getvalue() == ""
+    assert err.getvalue() == ""
+    assert returnCode == 0
+    for fileset in [
+        [
+            os.path.join(tmp_dir, "include", "foo.hpp"),
+            os.path.join(EXPECTED_DATA_FILES, "root_foo_config.hpp"),
+        ],
+        [
+            os.path.join(tmp_dir, "src", "foo.cpp"),
+            os.path.join(EXPECTED_DATA_FILES, "root_foo_config.cpp"),
+        ],
+    ]:
+        thenActualFileIsSameAsExpected(fileset[0], fileset[1])

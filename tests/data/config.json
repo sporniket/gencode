@@ -1,0 +1,11 @@
+{
+    "copyright":{
+       "years":"2021~2024",
+       "authors":"John Doe, John Dee"
+    },
+    "project":{
+       "name":"Super project",
+       "description":"A project you did not know that you needed it",
+       "licence":"GPL-3.0-or-later WITH this OR that"
+    }
+}

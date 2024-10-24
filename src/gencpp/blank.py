@@ -19,10 +19,12 @@ If not, see <https://www.gnu.org/licenses/>. 
 ---
 """
 
+import json
 import os
 import re
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from enum import Enum
 
 from gencode_lib import Identifier
 
@@ -78,6 +80,9 @@ def splitAndFilterPath(path: str) -> list[str]:
     return [f for f in path.split("/") if f and not ONLY_DOTS.match(f)]
 
 
+GENCODE = "gencode"
+SUPPORTED_FORMATS = [GENCODE]
+
 class GeneratorOfBlankFiles:
     def __init__(self):
         env = jinja2.Environment()
@@ -96,7 +101,7 @@ class GeneratorOfBlankFiles:
         # Add the arguments
         parser.add_argument(
             "--config",
-            metavar="<config>",
+            metavar="<format>:<path/to/config file>",
             type=str,
             help="the project wide configuration file",
         )
@@ -173,9 +178,6 @@ class GeneratorOfBlankFiles:
         elif not os.path.isdir(path):
             raise ValueError(f"not.directory:{path}")
 
-    def computeLicence(self, projectLicence: str = None) -> str:
-        return self._templates["licence"].render({"LABEL_PROJECT": projectLabel})
-
     def computeHeaderFileBody(self, args, config, index: int = 0):
         return self._templates["source_header"].render(config)
 
@@ -200,43 +202,69 @@ class GeneratorOfBlankFiles:
         except FileExistsError:
             print(f"error.file.exists:{target}")
 
-    def run(self, args):
-        config = {
+    def prepareConfig(self, args):
+        return {
             "YEARS_COPYRIGHT": args.copyright_years,
             "NAMES_COPYRIGHT": args.copyright_authors,
             "LABEL_PROJECT": args.project_name,
             "DESCRIPTION_PROJECT": args.project_description,
             "SPDX_CLAUSE": args.project_licence,
         }
-        if args.config:
-            # TODO initialise default configuration and override with config file
-            pass
+
+    def applyConfigFile_GENCODE(self, configOrigin, configJson):
+        if configJson["copyright"]:
+            if configJson["copyright"]["years"]:
+                configOrigin["YEARS_COPYRIGHT"] = configJson["copyright"]["years"]
+            if configJson["copyright"]["authors"]:
+                configOrigin["NAMES_COPYRIGHT"] = configJson["copyright"]["authors"]
+        if configJson["project"]:
+            if configJson["project"]["name"]:
+                configOrigin["LABEL_PROJECT"] = configJson["project"]["name"]
+            if configJson["project"]["description"]:
+                configOrigin["DESCRIPTION_PROJECT"] = configJson["project"][
+                    "description"
+                ]
+            if configJson["project"]["licence"]:
+                configOrigin["SPDX_CLAUSE"] = configJson["project"]["licence"]
+
+    def finalizeConfig(self, config):
+        config["COPYRIGHT"] = self._templates["copyright"].render(config)
+        if config["SPDX_CLAUSE"]:
+            config["LICENCE_SPDX"] = self._templates["licence_spdx_id"].render(config)
+            if config["DESCRIPTION_PROJECT"]:
+                config["LICENCE"] = self._templates[
+                    "with_licence_with_description"
+                ].render(config)
+            else:
+                config["LICENCE"] = self._templates[
+                    "with_licence_no_description"
+                ].render(config)
         else:
-            config["COPYRIGHT"] = self._templates["copyright"].render(config)
-            if config["SPDX_CLAUSE"]:
-                config["LICENCE_SPDX"] = self._templates["licence_spdx_id"].render(
+            config["LICENCE_SPDX"] = ""
+            if config["DESCRIPTION_PROJECT"]:
+                config["LICENCE"] = self._templates[
+                    "no_licence_with_description"
+                ].render(config)
+            else:
+                config["LICENCE"] = self._templates["no_licence_no_description"].render(
                     config
                 )
-                if config["DESCRIPTION_PROJECT"]:
-                    config["LICENCE"] = self._templates[
-                        "with_licence_with_description"
-                    ].render(config)
-                else:
-                    config["LICENCE"] = self._templates[
-                        "with_licence_no_description"
-                    ].render(config)
-            else:
-                config["LICENCE_SPDX"] = ""
-                if config["DESCRIPTION_PROJECT"]:
-                    config["LICENCE"] = self._templates[
-                        "no_licence_with_description"
-                    ].render(config)
-                else:
-                    config["LICENCE"] = self._templates[
-                        "no_licence_no_description"
-                    ].render(config)
-            # TODO initialise default configuration
-            pass
+
+    def run(self, args):
+        config = self.prepareConfig(args)
+
+        if args.config:
+            format, pathToFile = args.config.split(":", 1)
+            if format not in SUPPORTED_FORMATS:
+                raise ValueError(f"unsupported.config.format:{format}")
+            if not os.path.isfile(pathToFile):
+                raise ValueError(f"file.not.found.or.not.regular.file:{pathToFile}")
+            if format == GENCODE:
+                with open(pathToFile) as sourceJson:
+                    source = json.load(sourceJson)
+                self.applyConfigFile_GENCODE(config, source)
+
+        self.finalizeConfig(config)
 
         rootPath = "."
         if args.root:

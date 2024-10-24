@@ -42,7 +42,7 @@ def thenItHasExpectedFolders(folders: list[str]):
         assert os.path.isdir(f)
 
 
-def test_that_it_create_files_in_main_directory():
+def test_that_it_generate_a_blank_cpp_file_and_its_header():
     # Prepare files
     setupFileNames = []
     tmp_dir = initializeTmpWorkspace(
@@ -81,6 +81,94 @@ def test_that_it_create_files_in_main_directory():
         [
             os.path.join(tmp_dir, "src", "foo.cpp"),
             os.path.join(EXPECTED_DATA_FILES, "root_foo.cpp"),
+        ],
+    ]:
+        thenActualFileIsSameAsExpected(fileset[0], fileset[1])
+
+
+def test_that_it_generate_a_valid_copyright_notice():
+    # Prepare files
+    setupFileNames = []
+    tmp_dir = initializeTmpWorkspace(
+        [os.path.join(SOURCE_DATA_FILES, f) for f in setupFileNames]
+    )
+
+    # execute
+    with patch.object(
+        sys,
+        "argv",
+        ARGS
+        + [
+            "--root",
+            tmp_dir,
+            "--copyright_years",
+            "2021~2024",
+            "--copyright_authors",
+            "John Doe, John Dee",
+            "foo",
+        ],
+    ):
+        with redirect_stdout(io.StringIO()) as out:
+            with redirect_stderr(io.StringIO()) as err:
+                returnCode = GenCppCli().run()
+
+    # verify
+    assert out.getvalue() == ""
+    assert err.getvalue() == ""
+    assert returnCode == 0
+    for fileset in [
+        [
+            os.path.join(tmp_dir, "include", "foo.hpp"),
+            os.path.join(EXPECTED_DATA_FILES, "root_foo_copyright.hpp"),
+        ],
+        [
+            os.path.join(tmp_dir, "src", "foo.cpp"),
+            os.path.join(EXPECTED_DATA_FILES, "root_foo_copyright.cpp"),
+        ],
+    ]:
+        thenActualFileIsSameAsExpected(fileset[0], fileset[1])
+
+
+def test_that_it_generate_a_valid_licence_notice():
+    # Prepare files
+    setupFileNames = []
+    tmp_dir = initializeTmpWorkspace(
+        [os.path.join(SOURCE_DATA_FILES, f) for f in setupFileNames]
+    )
+
+    # execute
+    with patch.object(
+        sys,
+        "argv",
+        ARGS
+        + [
+            "--root",
+            tmp_dir,
+            "--project_name",
+            "Super project",
+            "--project_description",
+            "A project you did not know that you needed it",
+            "--project_licence",
+            "GPL-3.0-or-later WITH this OR that",
+            "foo",
+        ],
+    ):
+        with redirect_stdout(io.StringIO()) as out:
+            with redirect_stderr(io.StringIO()) as err:
+                returnCode = GenCppCli().run()
+
+    # verify
+    assert out.getvalue() == ""
+    assert err.getvalue() == ""
+    assert returnCode == 0
+    for fileset in [
+        [
+            os.path.join(tmp_dir, "include", "foo.hpp"),
+            os.path.join(EXPECTED_DATA_FILES, "root_foo_licence.hpp"),
+        ],
+        [
+            os.path.join(tmp_dir, "src", "foo.cpp"),
+            os.path.join(EXPECTED_DATA_FILES, "root_foo_licence.cpp"),
         ],
     ]:
         thenActualFileIsSameAsExpected(fileset[0], fileset[1])

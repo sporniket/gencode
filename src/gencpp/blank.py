@@ -30,25 +30,17 @@ import jinja2
 
 TEMPLATE_SOURCES = {
     "copyright": """Copyright (C) {{YEARS_COPYRIGHT}} {{NAMES_COPYRIGHT}}""",
-    "licence_none": """ALL RIGHT RESERVED -- project '{{LABEL_PROJECT}}'""",
-    "licence_gpl-3.0-or-later": """This is part of {{LABEL_PROJECT}} -- {{DESCRIPTION_PROJECT}}.
-
-{{LABEL_PROJECT}} is free software: you can redistribute it and/or
-modify it under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your option)
-any later version.
-
-{{LABEL_PROJECT}} is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.
-
-See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with Gencode.
-If not, see <https://www.gnu.org/licenses/>. 
-
+    # ---
+    "no_licence_no_description": """ALL RIGHT RESERVED -- project '{{LABEL_PROJECT}}'""",
+    "no_licence_with_description": """ALL RIGHT RESERVED -- project '{{LABEL_PROJECT}}' -- {{DESCRIPTION_PROJECT}}.""",
+    "with_licence_no_description": """This is part of {{LABEL_PROJECT}}.""",
+    "with_licence_with_description": """This is part of {{LABEL_PROJECT}} -- {{DESCRIPTION_PROJECT}}.""",
+    # ---
+    "licence_spdx_id": """/* SPDX-License-Identifier: {{SPDX_CLAUSE}} */
 
 """,
-    "source_header": """/****************************************
+    # ---
+    "source_header": """{{LICENCE_SPDX}}/****************************************
 
 ---
 {{COPYRIGHT}}
@@ -63,7 +55,8 @@ If not, see <https://www.gnu.org/licenses/>. 
 
 // ================[ END OF CODE ]================
 #endif""",
-    "source_main": """/****************************************
+    # ---
+    "source_main": """{{LICENCE_SPDX}}/****************************************
 
 ---
 {{COPYRIGHT}}
@@ -126,6 +119,30 @@ class GeneratorOfBlankFiles:
         )
 
         parser.add_argument(
+            "--project_name",
+            metavar="<project name>",
+            type=str,
+            default="Unknown project",
+            help="The project name or title",
+        )
+
+        parser.add_argument(
+            "--project_description",
+            metavar="<project description>",
+            type=str,
+            default="",
+            help="An hopefully short, one-line phrase that describe what this project is all about",
+        )
+
+        parser.add_argument(
+            "--project_licence",
+            metavar="<project licence>",
+            type=str,
+            default="",
+            help="A SPDX identifier or a SPDX license expressions",
+        )
+
+        parser.add_argument(
             "params",
             metavar="<parameter...>",
             type=str,
@@ -172,15 +189,37 @@ class GeneratorOfBlankFiles:
         config = {
             "YEARS_COPYRIGHT": args.copyright_years,
             "NAMES_COPYRIGHT": args.copyright_authors,
-            "LABEL_PROJECT": "Unknown project",
-            "DESCRIPTION_PROJECT": "This project is unknown",
+            "LABEL_PROJECT": args.project_name,
+            "DESCRIPTION_PROJECT": args.project_description,
+            "SPDX_CLAUSE": args.project_licence,
         }
         if args.config:
             # TODO initialise default configuration and override with config file
             pass
         else:
             config["COPYRIGHT"] = self._templates["copyright"].render(config)
-            config["LICENCE"] = self._templates["licence_none"].render(config)
+            if config["SPDX_CLAUSE"]:
+                config["LICENCE_SPDX"] = self._templates["licence_spdx_id"].render(
+                    config
+                )
+                if config["DESCRIPTION_PROJECT"]:
+                    config["LICENCE"] = self._templates[
+                        "with_licence_with_description"
+                    ].render(config)
+                else:
+                    config["LICENCE"] = self._templates[
+                        "with_licence_no_description"
+                    ].render(config)
+            else:
+                config["LICENCE_SPDX"] = ""
+                if config["DESCRIPTION_PROJECT"]:
+                    config["LICENCE"] = self._templates[
+                        "no_licence_with_description"
+                    ].render(config)
+                else:
+                    config["LICENCE"] = self._templates[
+                        "no_licence_no_description"
+                    ].render(config)
             # TODO initialise default configuration
             pass
 

@@ -1,6 +1,6 @@
 [project]
 name = "gencode-by-sporniket"
-version = "1.0.0"
+version = "1.0.1"
 description = "Sporniket's toolbox for generating code"
 authors = [
     {name = "Sporniket", email = "sporniket.studio@gmail.com"},

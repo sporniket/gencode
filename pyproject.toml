@@ -22,7 +22,7 @@ bug-tracker = "https://github.com/sporniket/gencode/issues"
 
 [project.scripts]
 gncpp = "gencode.gencpp.__main__:main"
-gnpy = "gencode.genpython.__main__:main"
+# gnpy = "gencode.genpython.__main__:main"
 
 
 [build-system]

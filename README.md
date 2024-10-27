@@ -20,7 +20,14 @@ Content
 
 ### What's new in version 1.0.0
 
-* Initial release, that can generate blank cpp files and their header files.
+Initial release, that can generate blank cpp files and their header files.
+
+* Resolves #1 : [gencpp] generate a blank cpp file and its header
+* Resolves #2 : [gencpp] generate a valid copyright notice
+* Resolves #3 : [gencpp] generate a valid licence notice
+* Resolves #4 : [gencpp] generate a header guard using a library name
+* Resolves #5 : [gencpp] use a config file to factor common parameters
+
 
 ### Licence
  **gencode – Sporniket's toolbox for generating code** is free software: you can redistribute it and/or modify it under the terms of the

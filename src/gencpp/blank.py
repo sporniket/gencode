@@ -33,10 +33,10 @@ import jinja2
 TEMPLATE_SOURCES = {
     "copyright": """Copyright (C) {{YEARS_COPYRIGHT}} {{NAMES_COPYRIGHT}}""",
     # ---
-    "no_licence_no_description": """ALL RIGHT RESERVED -- project '{{LABEL_PROJECT}}'""",
-    "no_licence_with_description": """ALL RIGHT RESERVED -- project '{{LABEL_PROJECT}}' -- {{DESCRIPTION_PROJECT}}.""",
-    "with_licence_no_description": """This is part of {{LABEL_PROJECT}}.""",
-    "with_licence_with_description": """This is part of {{LABEL_PROJECT}} -- {{DESCRIPTION_PROJECT}}.""",
+    "no_licence_no_description": """ALL RIGHT RESERVED -- project **{{LABEL_PROJECT}}**.""",
+    "no_licence_with_description": """ALL RIGHT RESERVED -- project **{{LABEL_PROJECT}}**.\n{{DESCRIPTION_PROJECT}}.""",
+    "with_licence_no_description": """This is part of **{{LABEL_PROJECT}}**.""",
+    "with_licence_with_description": """This is part of **{{LABEL_PROJECT}}**.\n{{DESCRIPTION_PROJECT}}.""",
     # ---
     "licence_spdx_id": """/* SPDX-License-Identifier: {{SPDX_CLAUSE}} */
 
@@ -82,6 +82,7 @@ def splitAndFilterPath(path: str) -> list[str]:
 
 GENCODE = "gencode"
 SUPPORTED_FORMATS = [GENCODE]
+
 
 class GeneratorOfBlankFiles:
     def __init__(self):

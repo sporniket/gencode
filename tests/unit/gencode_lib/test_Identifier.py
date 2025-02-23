@@ -93,6 +93,12 @@ def test__Identifier__should_spot_separators_when_breaking_down_into_parts():
     assert p[2].isRegular and p[2].lowered == "ever"
 
 
+def test__Identifier__should_consider_non_ascii_letters_as_separator():
+    p = Identifier("é").parts
+    assert len(p) == 1
+    assert p[0].isSeparator
+
+
 def test__Identifier_allcaps__should_render_all_caps_identifiers():
     assert Identifier("whatever").allcaps == "WHATEVER"
 
@@ -108,3 +114,11 @@ def test__Identifier_allcaps__should_render_all_caps_identifiers():
         "WHAT__EVER",
     ]:
         assert Identifier(id).allcaps == "WHAT__EVER"
+
+
+def test__Identifier_sluggified__should_strip_leading_and_trailing_separator():
+    assert Identifier("---whatever---").sluggified == "whatever"
+
+
+def test__Identifier_sluggified__should_have_no_sequences_of_separator():
+    assert Identifier("what___--_-_____ever").sluggified == "what_ever"

@@ -207,3 +207,9 @@ class Identifier:
     def allcaps(self):
         render = [p.allcaps for p in self._parts]
         return "_".join(render).replace("___", "__")
+
+    @property
+    def sluggified(self):
+        render = [p.lowered for p in self._parts]
+        lowered = "_".join(render).replace("___", "_")
+        return re.sub(r"^_+|_+$", "", lowered)

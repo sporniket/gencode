@@ -30,48 +30,7 @@ from gencode_lib import Identifier
 
 import jinja2
 
-TEMPLATE_SOURCES = {
-    "copyright": """Copyright (C) {{YEARS_COPYRIGHT}} {{NAMES_COPYRIGHT}}""",
-    # ---
-    "no_licence_no_description": """ALL RIGHT RESERVED -- project **{{LABEL_PROJECT}}**.""",
-    "no_licence_with_description": """ALL RIGHT RESERVED -- project **{{LABEL_PROJECT}}**.\n{{DESCRIPTION_PROJECT}}.""",
-    "with_licence_no_description": """This is part of **{{LABEL_PROJECT}}**.""",
-    "with_licence_with_description": """This is part of **{{LABEL_PROJECT}}**.\n{{DESCRIPTION_PROJECT}}.""",
-    # ---
-    "licence_spdx_id": """/* SPDX-License-Identifier: {{SPDX_CLAUSE}} */
-
-""",
-    # ---
-    "source_header": """{{LICENCE_SPDX}}/****************************************
-
----
-{{COPYRIGHT}}
----
-{{LICENCE}}
-****************************************/
-#ifndef {{CODE_GUARD}}
-#define {{CODE_GUARD}}
-// ================[ CODE BEGINS ]================
-
-// ...your code...
-
-// ================[ END OF CODE ]================
-#endif""",
-    # ---
-    "source_main": """{{LICENCE_SPDX}}/****************************************
-
----
-{{COPYRIGHT}}
----
-{{LICENCE}}
-****************************************/
-#include "{{NAME_HEADER}}.hpp"
-
-// ...your code...
-
-""",
-}
-
+from .templates import TEMPLATE_SOURCES
 
 ONLY_DOTS = re.compile(r"[.]{3,}")  # accept '.' and '..' as path fragment
 
@@ -179,26 +138,46 @@ class GeneratorOfBlankFiles:
         elif not os.path.isdir(path):
             raise ValueError(f"not.directory:{path}")
 
-    def computeHeaderFileBody(self, args, config, index: int = 0):
+    def computeHeaderFileBody(
+        self, args, config, index: int = 0, bodyTemplate: str = "header_body_blank"
+    ):
+        config["HEADER_BODY"] = TEMPLATE_SOURCES[bodyTemplate]
         return self._templates["source_header"].render(config)
 
-    def computeProgramFileBody(self, args, config, index: int = 0):
+    def computeProgramFileBody(
+        self, args, config, index: int = 0, bodyTemplate: str = "source_body_blank"
+    ):
+        config["SOURCE_BODY"] = TEMPLATE_SOURCES[bodyTemplate]
         return self._templates["source_main"].render(config)
 
-    def generateHeaderFile(self, rootPath, args, config, index: int = 0):
+    def generateHeaderFile(
+        self,
+        rootPath,
+        args,
+        config,
+        index: int = 0,
+        bodyTemplate: str = "header_body_blank",
+    ):
         target = os.path.join(rootPath, "include", args.params[index] + ".hpp")
         try:
             with open(target, "x") as out:
-                source = self.computeHeaderFileBody(args, config, index)
+                source = self.computeHeaderFileBody(args, config, index, bodyTemplate)
                 out.write(source)
         except FileExistsError:
             print(f"error.file.exists:{target}")
 
-    def generateProgramFile(self, rootPath, args, config, index: int = 0):
+    def generateProgramFile(
+        self,
+        rootPath,
+        args,
+        config,
+        index: int = 0,
+        bodyTemplate: str = "source_body_blank",
+    ):
         target = os.path.join(rootPath, "src", args.params[index] + ".cpp")
         try:
             with open(target, "x") as out:
-                source = self.computeProgramFileBody(args, config, index)
+                source = self.computeProgramFileBody(args, config, index, bodyTemplate)
                 out.write(source)
         except FileExistsError:
             print(f"error.file.exists:{target}")

@@ -43,7 +43,7 @@ GENCODE = "gencode"
 SUPPORTED_FORMATS = [GENCODE]
 
 
-class GeneratorOfBlankFiles:
+class MainGeneratorForBlank:
     def __init__(self):
         env = jinja2.Environment()
         templates = {}
@@ -138,50 +138,6 @@ class GeneratorOfBlankFiles:
         elif not os.path.isdir(path):
             raise ValueError(f"not.directory:{path}")
 
-    def computeHeaderFileBody(
-        self, args, config, index: int = 0, bodyTemplate: str = "header_body_blank"
-    ):
-        config["HEADER_BODY"] = TEMPLATE_SOURCES[bodyTemplate]
-        return self._templates["source_header"].render(config)
-
-    def computeProgramFileBody(
-        self, args, config, index: int = 0, bodyTemplate: str = "source_body_blank"
-    ):
-        config["SOURCE_BODY"] = TEMPLATE_SOURCES[bodyTemplate]
-        return self._templates["source_main"].render(config)
-
-    def generateHeaderFile(
-        self,
-        rootPath,
-        args,
-        config,
-        index: int = 0,
-        bodyTemplate: str = "header_body_blank",
-    ):
-        target = os.path.join(rootPath, "include", args.params[index] + ".hpp")
-        try:
-            with open(target, "x") as out:
-                source = self.computeHeaderFileBody(args, config, index, bodyTemplate)
-                out.write(source)
-        except FileExistsError:
-            print(f"error.file.exists:{target}")
-
-    def generateProgramFile(
-        self,
-        rootPath,
-        args,
-        config,
-        index: int = 0,
-        bodyTemplate: str = "source_body_blank",
-    ):
-        target = os.path.join(rootPath, "src", args.params[index] + ".cpp")
-        try:
-            with open(target, "x") as out:
-                source = self.computeProgramFileBody(args, config, index, bodyTemplate)
-                out.write(source)
-        except FileExistsError:
-            print(f"error.file.exists:{target}")
-
     def prepareConfig(self, args):
         return {
             "YEARS_COPYRIGHT": args.copyright_years,
@@ -259,6 +215,8 @@ class GeneratorOfBlankFiles:
         self.checkFolderOrMake(os.path.join(rootPath, "include"))
         self.checkFolderOrMake(os.path.join(rootPath, "src"))
 
+        header = GeneratorOfHeaderFile(rootPath, self._templates)
+        program = GeneratorOfProgramFile(rootPath, self._templates)
         for i, n in enumerate(args.params):
             guardName = (
                 f"_lib_{args.library}_{args.params[i]}.hpp"
@@ -267,7 +225,90 @@ class GeneratorOfBlankFiles:
             )
             config["CODE_GUARD"] = Identifier(guardName).allcaps
             config["NAME_HEADER"] = args.params[i]
-            self.generateHeaderFile(rootPath, args, config, i)
-            self.generateProgramFile(rootPath, args, config, i)
+            header.generate(n, i, config)
+            program.generate(n, i, config)
 
         return 0
+
+
+class _GeneratorOf:
+    def __init__(self, rootPath: str, templates):
+        self._rootPath = rootPath
+        self._templates = templates
+
+    def _computeFileName(self, localPath: str, baseName: str, extension: str) -> str:
+        return (
+            os.path.join(self._rootPath, localPath, f"{baseName}.{extension}")
+            if len(extension) > 0
+            else os.path.join(self._rootPath, localPath, baseName)
+        )
+
+    def _write(self, fileName, fileContent):
+        try:
+            with open(fileName, "x") as out:
+                out.write(fileContent)
+        except FileExistsError:
+            print(f"error.file.exists:{fileName}")
+
+    def generate(
+        self,
+        name,
+        index: int,
+        config: dict[str, str],
+        *,
+        bodyTemplate: str = "header_body_blank",
+        localPath: str = "include",
+    ):
+        pass
+
+
+class GeneratorOfHeaderFile(_GeneratorOf):
+    def __init__(self, rootPath: str, templates):
+        super().__init__(rootPath, templates)
+
+    def _computeConfig(
+        self, config: dict[str, str], bodyTemplateKey: str
+    ) -> dict[str, str]:
+        result = {"HEADER_BODY": TEMPLATE_SOURCES[bodyTemplateKey]}
+        result.update(config)
+        return result
+
+    def generate(
+        self,
+        name,
+        index: int,
+        config: dict[str, str],
+        *,
+        bodyTemplate: str = "header_body_blank",
+        localPath: str = "include",
+    ):
+        headerConfig = self._computeConfig(config, bodyTemplate)
+        source = self._templates["source_header"].render(headerConfig)
+        target = self._computeFileName(localPath, name, "hpp")
+        self._write(target, source)
+
+
+class GeneratorOfProgramFile(_GeneratorOf):
+    def __init__(self, rootPath: str, templates):
+        super().__init__(rootPath, templates)
+
+    def _computeConfig(
+        self, config: dict[str, str], bodyTemplateKey: str
+    ) -> dict[str, str]:
+        result = {"SOURCE_BODY": TEMPLATE_SOURCES[bodyTemplateKey]}
+        result.update(config)
+        return result
+
+    def generate(
+        self,
+        name,
+        index: int,
+        config: dict[str, str],
+        *,
+        bodyTemplate: str = "source_body_blank",
+        localPath: str = "src",
+    ):
+        sourceConfig = self._computeConfig(config, bodyTemplate)
+        source = self._templates["source_main"].render(sourceConfig)
+        target = self._computeFileName(localPath, name, "cpp")
+        self._write(target, source)

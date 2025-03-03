@@ -24,9 +24,9 @@ import re
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
-from .blank import GeneratorOfBlankFiles
+from .blank import MainGeneratorForBlank
 
-generators = {"blank": GeneratorOfBlankFiles()}
+producers = {"blank": MainGeneratorForBlank()}
 
 
 class GenCppCli:
@@ -61,8 +61,8 @@ If not, see <https://www.gnu.org/licenses/>. 
 
         # Add the subparsers
         subparsers = parser.add_subparsers(help="The generator to use", required=True)
-        for key in generators:
-            generators[key].appendSubParser(key, subparsers)
+        for key in producers:
+            producers[key].appendSubParser(key, subparsers)
 
         return parser
 

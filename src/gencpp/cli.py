@@ -24,9 +24,9 @@ import re
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
-from .blank import MainGeneratorForBlank
+from .producers import ProducerOfBlank
 
-producers = {"blank": MainGeneratorForBlank()}
+producers = {"blank": ProducerOfBlank()}
 
 
 class GenCppCli:

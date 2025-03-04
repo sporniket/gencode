@@ -24,9 +24,12 @@ import re
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
-from .producers import ProducerOfBlank
+from .producers import ProducerOfBlank, ProducerOfSourcelibTesting
 
-producers = {"blank": ProducerOfBlank()}
+producers = {
+    "blank": ProducerOfBlank(),
+    "sourcelib-testing": ProducerOfSourcelibTesting(),
+}
 
 
 class GenCppCli:

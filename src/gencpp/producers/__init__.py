@@ -20,5 +20,6 @@ If not, see <https://www.gnu.org/licenses/>. 
 """
 
 from .blank import ProducerOfBlank
+from .sourcelib_testing import ProducerOfSourcelibTesting
 
-__all__ = ["ProducerOfBlank"]
+__all__ = ["ProducerOfBlank", "ProducerOfSourcelibTesting"]

@@ -1,15 +1,16 @@
-/* SPDX-License-Identifier: GPL-3.0-or-later WITH this OR that */
 /****************************************
 
 ---
 Copyright (C) 20xx Unknown author
 ---
-This is part of **Super project**.
-A project you did not know that you needed it.
+ALL RIGHT RESERVED -- project **Unknown project**.
+
 ****************************************/
-#ifndef FOO__HPP
-#define FOO__HPP
+#ifndef __LIB__SUPER_UTILS__FOO__HPP
+#define __LIB__SUPER_UTILS__FOO__HPP
 // ================[ CODE BEGINS ]================
+
+// ...your includes... 
 
 // ...your code...
 

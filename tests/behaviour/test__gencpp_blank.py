@@ -33,7 +33,7 @@ from gencpp import GenCppCli
 
 ARGS = ["prog", "blank"]
 SOURCE_DATA_FILES = os.path.join(".", "tests", "data")
-EXPECTED_DATA_FILES = os.path.join(".", "tests", "data.expected")
+EXPECTED_DATA_FILES = os.path.join(".", "tests", "data.expected", "blank")
 
 
 def thenItHasExpectedFolders(folders: list[str]):
@@ -68,19 +68,19 @@ def test_that_it_generate_a_blank_cpp_file_and_its_header():
     for fileset in [
         [
             os.path.join(tmp_dir, "include", "whatEver.hpp"),
-            os.path.join(EXPECTED_DATA_FILES, "root_whatever.hpp"),
+            os.path.join(EXPECTED_DATA_FILES, "with-params", "root_whatever.hpp"),
         ],
         [
             os.path.join(tmp_dir, "src", "whatEver.cpp"),
-            os.path.join(EXPECTED_DATA_FILES, "root_whatever.cpp"),
+            os.path.join(EXPECTED_DATA_FILES, "with-params", "root_whatever.cpp"),
         ],
         [
             os.path.join(tmp_dir, "include", "foo.hpp"),
-            os.path.join(EXPECTED_DATA_FILES, "root_foo.hpp"),
+            os.path.join(EXPECTED_DATA_FILES, "with-params", "root_foo.hpp"),
         ],
         [
             os.path.join(tmp_dir, "src", "foo.cpp"),
-            os.path.join(EXPECTED_DATA_FILES, "root_foo.cpp"),
+            os.path.join(EXPECTED_DATA_FILES, "with-params", "root_foo.cpp"),
         ],
     ]:
         thenActualFileIsSameAsExpected(fileset[0], fileset[1])
@@ -119,11 +119,15 @@ def test_that_it_generate_a_valid_copyright_notice():
     for fileset in [
         [
             os.path.join(tmp_dir, "include", "foo.hpp"),
-            os.path.join(EXPECTED_DATA_FILES, "root_foo_copyright.hpp"),
+            os.path.join(
+                EXPECTED_DATA_FILES, "with-copyright", "root_foo_copyright.hpp"
+            ),
         ],
         [
             os.path.join(tmp_dir, "src", "foo.cpp"),
-            os.path.join(EXPECTED_DATA_FILES, "root_foo_copyright.cpp"),
+            os.path.join(
+                EXPECTED_DATA_FILES, "with-copyright", "root_foo_copyright.cpp"
+            ),
         ],
     ]:
         thenActualFileIsSameAsExpected(fileset[0], fileset[1])
@@ -164,11 +168,11 @@ def test_that_it_generate_a_valid_licence_notice():
     for fileset in [
         [
             os.path.join(tmp_dir, "include", "foo.hpp"),
-            os.path.join(EXPECTED_DATA_FILES, "root_foo_licence.hpp"),
+            os.path.join(EXPECTED_DATA_FILES, "with-licence", "root_foo_licence.hpp"),
         ],
         [
             os.path.join(tmp_dir, "src", "foo.cpp"),
-            os.path.join(EXPECTED_DATA_FILES, "root_foo_licence.cpp"),
+            os.path.join(EXPECTED_DATA_FILES, "with-licence", "root_foo_licence.cpp"),
         ],
     ]:
         thenActualFileIsSameAsExpected(fileset[0], fileset[1])
@@ -205,11 +209,11 @@ def test_that_it_generate_a_header_guard_using_a_library_name():
     for fileset in [
         [
             os.path.join(tmp_dir, "lib", "superUtils", "include", "foo.hpp"),
-            os.path.join(EXPECTED_DATA_FILES, "lib_foo.hpp"),
+            os.path.join(EXPECTED_DATA_FILES, "with-library", "lib_foo.hpp"),
         ],
         [
             os.path.join(tmp_dir, "lib", "superUtils", "src", "foo.cpp"),
-            os.path.join(EXPECTED_DATA_FILES, "lib_foo.cpp"),
+            os.path.join(EXPECTED_DATA_FILES, "with-library", "lib_foo.cpp"),
         ],
     ]:
         thenActualFileIsSameAsExpected(fileset[0], fileset[1])
@@ -246,11 +250,11 @@ def test_that_it_uses_a_config_file_to_factor_common_parameters():
     for fileset in [
         [
             os.path.join(tmp_dir, "include", "foo.hpp"),
-            os.path.join(EXPECTED_DATA_FILES, "root_foo_config.hpp"),
+            os.path.join(EXPECTED_DATA_FILES, "with-option", "root_foo_config.hpp"),
         ],
         [
             os.path.join(tmp_dir, "src", "foo.cpp"),
-            os.path.join(EXPECTED_DATA_FILES, "root_foo_config.cpp"),
+            os.path.join(EXPECTED_DATA_FILES, "with-option", "root_foo_config.cpp"),
         ],
     ]:
         thenActualFileIsSameAsExpected(fileset[0], fileset[1])

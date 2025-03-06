@@ -2,10 +2,10 @@
 /****************************************
 
 ---
-Copyright (C) 2021~2024 John Doe, John Dee
+Copyright (C) 20xx Unknown author
 ---
 This is part of **Super project**.
-A project you did not know that you needed it.
+A project you did not know that you needed it
 ****************************************/
 #include "foo.hpp"
 

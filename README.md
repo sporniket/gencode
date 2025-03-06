@@ -18,6 +18,12 @@ Content
 
 **gencode – Sporniket's toolbox for generating code** is a code generator. For now it can generate a set of blanks cpp files and their header files, with parameters to have proper licence notice, copyright notices and taylored header guards.
 
+### What's new in version 1.1.0
+
+A new generator is available to create a test runner for a source library project.
+
+* Resolves #6 : [gencpp] 'gencpp sourcelib-testing'
+
 ### What's new in version 1.0.1
 
 Change entry point from `gncpp` to `gencpp`, as expected by the READMEs. 
